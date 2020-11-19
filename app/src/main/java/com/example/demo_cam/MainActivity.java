@@ -87,6 +87,25 @@ public class MainActivity extends AppCompatActivity {
         resmat = new Mat();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startBackgroundThread();
+        if (textureView.isAvailable()) {
+            setupCamera(textureView.getWidth(), textureView.getHeight());
+            openCamera();
+        } else {
+            textureView.setSurfaceTextureListener(surfaceTextureListener);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        stopBackgroundThread();
+        closeCamera();
+        super.onPause();
+    }
+
     private TextureView.SurfaceTextureListener surfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -115,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
             for (String id : cameraManager.getCameraIdList()) {
                 CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(id);
 
-                // ở đây mình sử dụng Camera sau để thực hiện bài test.
                 if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) != CameraCharacteristics.LENS_FACING_FRONT) {
                     continue;
                 }
@@ -160,6 +178,26 @@ public class MainActivity extends AppCompatActivity {
         return mapSize[0];
     }
 
+    private void openCamera() {
+        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        try {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 100);
+                return;
+            }
+            cameraManager.openCamera(cameraId, cameraDeviceStateCallback, null);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void closeCamera(){
+        if (cameraDevice != null) {
+            cameraDevice.close();
+            cameraDevice = null;
+        }
+    }
+
     private CameraDevice.StateCallback cameraDeviceStateCallback = new CameraDevice.StateCallback() {
         @Override
         public void onOpened(CameraDevice camera) {
@@ -179,45 +217,6 @@ public class MainActivity extends AppCompatActivity {
             cameraDevice = null;
         }
     };
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        startBackgroundThread();
-        if (textureView.isAvailable()) {
-            setupCamera(textureView.getWidth(), textureView.getHeight());
-            openCamera();
-        } else {
-            textureView.setSurfaceTextureListener(surfaceTextureListener);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        stopBackgroundThread();
-        closeCamera();
-        super.onPause();
-    }
-
-    private void openCamera() {
-        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        try {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 100);
-                return;
-            }
-            cameraManager.openCamera(cameraId, cameraDeviceStateCallback, null);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void closeCamera(){
-        if (cameraDevice != null) {
-            cameraDevice.close();
-            cameraDevice = null;
-        }
-    }
 
     private CameraCaptureSession.CaptureCallback cameraSessionCaptureCallback =
             new CameraCaptureSession.CaptureCallback() {
@@ -246,23 +245,10 @@ public class MainActivity extends AppCompatActivity {
             surfaceTexture.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
             Surface previewSurface = new Surface(surfaceTexture);
 
-            // Khởi tạo CaptureRequestBuilder từ cameraDevice với template truyền vào là
-            // "CameraDevice.TEMPLATE_PREVIEW"
-            // Với template này thì CaptureRequestBuilder chỉ thực hiện View mà thôi
             previewCaptureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
 
-            // Thêm đích đến cho dữ liệu lấy về từ Camera
-            // Đích đến này phải nằm trong danh sách các đích đến của dữ liệu
-            // được định nghĩa trong cameraDevice.createCaptureSession() "phần định nghĩa này ngay bên dưới"
             previewCaptureRequestBuilder.addTarget(previewSurface);
 
-            // Khởi tạo 1 CaptureSession
-            // Arrays.asList(previewSurface) List danh sách các Surface
-            // ( đích đến của hình ảnh thu về từ Camera)
-            // Ở đây đơn giản là chỉ hiển thị hình ảnh thu về từ Camera nên chúng ta chỉ có 1 đối số.
-            // Nếu bạn muốn chụp ảnh hay quay video vvv thì
-            // ta có thể truyền thêm các danh sách đối số vào đây
-            // Vd: Arrays.asList(previewSurface, imageReader)
             init();
             startBackgroundThread();
             cameraDevice.createCaptureSession(Arrays.asList(previewSurface),
@@ -274,8 +260,6 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                             }
                             try {
-                                // Khởi tạo CaptureRequest từ CaptureRequestBuilder
-                                // với các thông số đã được thêm ở trên
                                 previewCaptureRequest = previewCaptureRequestBuilder.build();
                                 cameraCaptureSession = session;
                                 cameraCaptureSession.setRepeatingRequest(
@@ -293,8 +277,6 @@ public class MainActivity extends AppCompatActivity {
                                     "Create camera session fail", Toast.LENGTH_SHORT).show();
                         }
                     },
-                    // Đối số thứ 3 của hàm là 1 Handler,
-                    // nhưng do hiện tại chúng ta chưa làm gì nhiều nên mình tạm thời để là null
                     null);
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -328,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
                 runsegmentor = false;
             }
         } catch (InterruptedException e) {
-            Log.e("TAG", "Interrupted when stopping background thread", e);
+            Log.e(TAG, "Interrupted when stopping background thread", e);
         }catch (Exception e){
 
         }
@@ -349,7 +331,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-    private Bitmap fgd, bitmap;
     private void segment_frame() {
         if (cameraDevice == null) {
             return;
@@ -360,9 +341,9 @@ public class MainActivity extends AppCompatActivity {
         long t2 = SystemClock.uptimeMillis();
         Log.e(TAG, "t get bit map: "+(t2-t1));
         t1 = SystemClock.uptimeMillis();
-        segmentFrame(bitmap, fgd);
+        segment();
         t2 = SystemClock.uptimeMillis();
-        Log.e("TAG", "t total: "+(t2-t1) + " FPS: " + (1000.0/(t2-t1)));
+        Log.e(TAG, "t total: "+(t2-t1) + " FPS: " + (1000.0/(t2-t1)));
 //        bitmap.recycle();
 
         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -375,8 +356,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    String TAG = "deeplab";
-    int W = 128, H = 128, frame_height = 640, frame_width = 512;
+    String TAG = "______________________________";
+    int W = 128, H = 128, frame_height = 624, frame_width = 416;
     Interpreter.Options tfliteOptions = new Interpreter.Options();
     MappedByteBuffer tfliteModel;
     Interpreter tflite;
@@ -385,6 +366,10 @@ public class MainActivity extends AppCompatActivity {
     Bitmap result = Bitmap.createBitmap(frame_width, frame_height, Bitmap.Config.ARGB_8888);
     GpuDelegate gpuDelegate = new GpuDelegate();
     float[][][][] segmap = new float[1][W][H][2];
+    Mat invmskmat, resmat, fg, mskmat;
+    float[] tmp = new float[W*H];
+    Bitmap resbmp = Bitmap.createBitmap(frame_width, frame_height, Bitmap.Config.ARGB_8888);
+    private Bitmap fgd, bitmap;
 
     void init() throws IOException {
         tfliteModel = loadModelFile(this);
@@ -395,8 +380,7 @@ public class MainActivity extends AppCompatActivity {
         imgData.order(ByteOrder.nativeOrder());
     }
 
-
-    void segmentFrame(Bitmap bitmap, Bitmap fgd) {
+    void segment() {
         if(tflite==null) {
             result = fgd;
             return;
@@ -430,11 +414,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    Mat invmskmat, resmat, fg, mskmat;
-    float[] tmp = new float[W*H];
-
-    Bitmap resbmp = Bitmap.createBitmap(frame_width, frame_height, Bitmap.Config.ARGB_8888);
-
     void imageblend(Bitmap fg_bmp){
         if (segmap!=null){
             int sz = 0;
@@ -463,7 +442,6 @@ public class MainActivity extends AppCompatActivity {
 
             Core.multiply(mskmat, fg, resmat);
             Imgproc.GaussianBlur(fg, fg, new org.opencv.core.Size(9,9),0);
-//            Core.subtract(invmskmat, mskmat, invmskmat);
             Core.multiply(fg, invmskmat, fg);
             Core.add(fg, resmat, resmat);
 
@@ -485,8 +463,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void close() {
-        tflite.close();
-        tflite = null;
+        if(tflite!=null){
+            tflite.close();
+            tflite = null;
+        }
         gpuDelegate.close();
         gpuDelegate = null;
         tfliteModel = null;
