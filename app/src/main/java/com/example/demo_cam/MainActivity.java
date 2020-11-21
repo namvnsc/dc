@@ -30,6 +30,10 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import org.opencv.android.OpenCVLoader;
@@ -53,6 +57,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import jp.co.cyberagent.android.gpuimage.GPUImageView;
 
 import static org.opencv.core.CvType.CV_32F;
@@ -70,6 +75,14 @@ public class MainActivity extends AppCompatActivity {
     private CaptureRequest previewCaptureRequest;
     private CaptureRequest.Builder previewCaptureRequestBuilder;
     private CameraCaptureSession cameraCaptureSession;
+    private Button btnRatio;
+    private ImageButton btnFlash;
+    private SeekBar seekBar;
+    private CircleImageView image;
+    private ImageButton btnCapture;
+    private ImageButton btnChangeCamera;
+    private int ratioNumber = 34;
+    private boolean flash = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +90,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         textureView = (AutoFitTextureView)findViewById(R.id.textureView);
         gpuImageView = (GPUImageView)findViewById(R.id.gpuimageview);
+        btnCapture = findViewById(R.id.btnCapture);
+        btnChangeCamera = findViewById(R.id.btnChangeCamera);
+        btnFlash = findViewById(R.id.btnFlash);
+        btnRatio = findViewById(R.id.btnRatio);
+        seekBar = findViewById(R.id.seekBar);
+        image = findViewById(R.id.image);
+
         if (!OpenCVLoader.initDebug())
             Log.e("OpenCv", "Unable to load OpenCV");
         else
@@ -85,6 +105,46 @@ public class MainActivity extends AppCompatActivity {
         mskmat = new Mat();
         invmskmat = new Mat();
         resmat = new Mat();
+
+        btnRatio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (ratioNumber){
+                    case 34:
+                        btnRatio.setText("1 : 1");
+                        ratioNumber = 11;
+                        break;
+                    case 11:
+                        btnRatio.setText("4 : 5");
+                        ratioNumber = 45;
+                        break;
+                    case 45:
+                        btnRatio.setText("9 : 16");
+                        ratioNumber = 916;
+                        break;
+                    case 916:
+                        btnRatio.setText("3 : 4");
+                        ratioNumber = 34;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+
+        btnFlash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(flash){
+                    btnFlash.setImageResource(R.mipmap.none_flash);
+                    flash = false;
+                }
+                else {
+                    btnFlash.setImageResource(R.mipmap.flash);
+                    flash = true;
+                }
+            }
+        });
     }
 
     @Override

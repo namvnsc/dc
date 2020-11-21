@@ -22,7 +22,25 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:orientation="horizontal">
-            
+
+            <ImageButton
+                android:id="@+id/btnFlash"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:background="#ffffff"
+                android:src="@mipmap/flash"/>
+
+            <Button
+                android:id="@+id/btnRatio"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#ffffff"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:text="3 : 4" />
+
         </LinearLayout>
 
         <jp.co.cyberagent.android.gpuimage.GPUImageView
@@ -31,7 +49,7 @@
             android:layout_height="564dp" />
 
         <SeekBar
-            android:id="@+id/seekBar2"
+            android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:backgroundTint="#9F9F9F"
             android:background="#199F9F9F"
@@ -46,7 +64,7 @@
 
             <de.hdodenhof.circleimageview.CircleImageView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/profile_image"
+                android:id="@+id/image"
                 android:layout_width="65dp"
                 android:layout_height="65dp"
                 android:src="@mipmap/ava"
@@ -56,7 +74,7 @@
                 app:civ_border_color="#9E9E9E"/>
 
             <ImageButton
-                android:id="@+id/imageButton2"
+                android:id="@+id/btnCapture"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -65,7 +83,7 @@
                 app:srcCompat="@mipmap/btn_camera" />
 
             <ImageButton
-                android:id="@+id/imageButton3"
+                android:id="@+id/btnChangeCamera"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
