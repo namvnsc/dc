@@ -1,19 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <com.example.demo_cam.AutoFitTextureView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="416dp"
+        android:layout_height="624dp"
         android:layout_weight="1"
         android:id="@+id/textureView" />
 
-    <jp.co.cyberagent.android.gpuimage.GPUImageView
-        android:id="@+id/gpuimageview"
-        android:layout_width="416dp"
-        android:layout_height="624dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:background="#ffffff"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal">
+            
+        </LinearLayout>
+
+        <jp.co.cyberagent.android.gpuimage.GPUImageView
+            android:id="@+id/gpuimageview"
+            android:layout_width="match_parent"
+            android:layout_height="564dp" />
+
+        <SeekBar
+            android:id="@+id/seekBar2"
+            android:layout_width="match_parent"
+            android:backgroundTint="#9F9F9F"
+            android:background="#199F9F9F"
+            android:layout_height="30dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="8dp"
+            android:background="#FFFFFF"
+            android:orientation="horizontal">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/profile_image"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:src="@mipmap/ava"
+                app:civ_border_width="3dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                app:civ_border_color="#9E9E9E"/>
+
+            <ImageButton
+                android:id="@+id/imageButton2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="#FFFFFF"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/btn_camera" />
+
+            <ImageButton
+                android:id="@+id/imageButton3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                app:srcCompat="@mipmap/btn_camera_switch" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>
