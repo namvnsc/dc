@@ -30,7 +30,7 @@
                 android:layout_weight="1"
                 android:layout_gravity="center"
                 android:background="#ffffff"
-                android:src="@mipmap/flash"/>
+                android:src="@mipmap/none_flash"/>
 
             <Button
                 android:id="@+id/btnRatio"
